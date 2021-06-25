@@ -1,10 +1,15 @@
-from multiprocessing import Queue
+from multiprocessing import Queue, Process
 
 
-class Consumer():
+class Consumer(Process):
     def __init__(self, queue: Queue):
+        super(Consumer, self)
         self.queue = queue
         pass
 
-    def produce():
+    def run(self):
+        while True:
+            self.consume()
+
+    def consume(self):
         pass
