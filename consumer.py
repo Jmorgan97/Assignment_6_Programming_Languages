@@ -1,20 +1,28 @@
-from multiprocessing import Queue, Process
+from multiprocessing import Queue
+from threading import Thread, RLock
 import time
+import random
 
 
-class Consumer(Process):
-    def __init__(self, queue: Queue, idx: int):
-        super(Consumer, self)
+class Consumer(Thread):
+    def __init__(self, queue: Queue, idx: int, glock: RLock):
+        super(Consumer, self).__init__()
         self.queue = queue
         self.idx = idx
+        self.sleep = lambda: random.random() * 2
+        self.lock = glock
 
     def run(self):
-        while True:
-            self.consume()
+        try:
+            while True:
+                self.consume()
+                time.sleep(self.sleep())
+        except KeyboardInterrupt:
+            return
 
     def consume(self):
         if not self.queue.empty():
             item = self.queue.get()
-            print(f"Consumer({self.idx}): Received item {str(item)}")
-            time.sleep(2)
+            with self.lock:
+                print(f"Consumer({self.idx}): Received item {str(item)}")
         return
